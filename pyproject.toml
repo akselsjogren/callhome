@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "callhome"
+version = "0.1.0"
+description = "Report systems hostname/ip address to a redis db"
+authors = ["Aksel Sjögren <asjogren@itrsgroup.com>"]
+license = "MIT"
+
+[tool.poetry.scripts]
+"callhome" = "callhome.main:main"
+
+[tool.poetry.dependencies]
+python = "^3.6.8"
+redis = "^2.10"
+
+[tool.poetry.dev-dependencies]
+flake8 = "^4.0.1"
+black = "^21.12b0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
