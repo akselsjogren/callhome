@@ -3,7 +3,7 @@ Description=callhome with host address
 
 [Service]
 EnvironmentFile=/etc/sysconfig/callhome
-ExecStart=/usr/local/libexec/callhome --redis-host $REDIS_HOST
+ExecStart=/usr/local/libexec/callhome-agent --redis-host $REDIS_HOST
 User=daemon
 
 [Install]

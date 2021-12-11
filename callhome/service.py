@@ -10,7 +10,7 @@ import redis
 from .exceptions import CallHomeError
 
 
-class CallHome:
+class Agent:
     def __init__(self, redis_host):
         self._redis_host = redis_host
         self._ip = None
