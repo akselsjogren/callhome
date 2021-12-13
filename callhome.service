@@ -4,6 +4,7 @@ Description=callhome with host address
 [Service]
 EnvironmentFile=/etc/sysconfig/callhome
 ExecStart=/usr/local/libexec/callhome-agent --redis-host $REDIS_HOST
+ExecReload=kill -HUP $MAINPID
 User=daemon
 
 [Install]

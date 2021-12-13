@@ -26,17 +26,24 @@ class Agent:
         remove_on_exit=False
     ):
         log.info("Starting %s. pid: %d", self.__class__.__name__, os.getpid())
-        exit_event = threading.Event()
+        event_signalled = threading.Event()
+        event_exit = threading.Event()
 
         def _handler(signum, _):
-            log.info("Got signal %d, time to call it quits!", signum)
-            exit_event.set()
+            if signum in (signal.SIGTERM.value, signal.SIGINT.value):
+                log.info("Got signal %d, time to call it quits!", signum)
+                event_exit.set()
+            elif signum == signal.SIGHUP.value:
+                log.info("Got reload signal")
+            event_signalled.set()  # unblocks wait()
 
         signal.signal(signal.SIGTERM, _handler)
         signal.signal(signal.SIGINT, _handler)
+        signal.signal(signal.SIGHUP, _handler)
         failed_attemps = 0
 
-        while not exit_event.is_set():
+        while not event_exit.is_set():
+            event_signalled.clear()
             try:
                 self._register(self._get_ip(), expire_seconds)
             except redis.RedisError as e:
@@ -45,10 +52,10 @@ class Agent:
                 log.debug("%s", e.__class__, exc_info=True)
                 if failed_attemps >= max_conn_attemps:
                     break
-                exit_event.wait(60)
+                event_signalled.wait(60)
             else:
                 failed_attemps = 0
-                exit_event.wait(interval)
+                event_signalled.wait(interval)  # block until flag is set by signal
         if remove_on_exit:
             self._deregister()
         if failed_attemps:
