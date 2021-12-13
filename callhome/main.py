@@ -51,7 +51,7 @@ def _client():
             ["sudo", "install", "-v", "-b", "--mode=644", tempfile, hosts_path],
             check=True,
         )
-    os.unlink(tempfile)
+        os.unlink(tempfile)
 
 
 def _init_logging(args):
