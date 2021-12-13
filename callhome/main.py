@@ -13,11 +13,16 @@ from . import service
 def _agent():
     parser = _argp()
     parser.add_argument("--interval", type=int, default=3600)
+    parser.add_argument(
+        "--remove-on-exit",
+        action="store_true",
+        help="Remove ip address entry on SIGTERM",
+    )
     args = parser.parse_args()
     _init_logging(args)
 
     srv = service.Agent(args.redis_host)
-    srv.run(interval=args.interval)
+    srv.run(interval=args.interval, remove_on_exit=args.remove_on_exit)
 
 
 def _client():

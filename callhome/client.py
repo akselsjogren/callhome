@@ -6,10 +6,22 @@ import tempfile
 
 import redis
 
+from . import exceptions
+
 
 def get_all(redis_host, clear=False):
-    r = redis.Redis(host=redis_host, decode_responses=True)
-    hosts = r.hgetall("host_alive")
+    try:
+        r = redis.Redis(host=redis_host, decode_responses=True)
+        hosts = r.hgetall("host_alive")
+    except redis.ConnectionError as e:
+        log.error("%s", e)
+        log.debug("redis exception", exc_info=True)
+        raise exceptions.CallHomeError(
+            "Cannot connect to redis host %r. Set correct host with --redis-host or "
+            "environment CALLHOME_REDIS_HOST",
+            redis_host,
+        )
+
     log.debug("HGETALL host_alive: %s", hosts)
     ret = []
     for hostname, last_seen in hosts.items():

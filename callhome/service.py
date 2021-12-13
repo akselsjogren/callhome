@@ -17,7 +17,14 @@ class Agent:
         self._hostname = socket.gethostname()
         log.debug("gethostname() -> %s", self._hostname)
 
-    def run(self, *, interval=3600, expire_seconds=7200, max_conn_attemps=100):
+    def run(
+        self,
+        *,
+        interval=3600,
+        expire_seconds=7200,
+        max_conn_attemps=100,
+        remove_on_exit=False
+    ):
         log.info("Starting %s. pid: %d", self.__class__.__name__, os.getpid())
         exit_event = threading.Event()
 
@@ -42,6 +49,8 @@ class Agent:
             else:
                 failed_attemps = 0
                 exit_event.wait(interval)
+        if remove_on_exit:
+            self._deregister()
         if failed_attemps:
             raise CallHomeError(
                 "Failed to connect to %s. Attemps: %d", self._redis_host, failed_attemps
@@ -55,8 +64,21 @@ class Agent:
         log.debug("redis SET %r %r EX %d", key, ip, expire_seconds)
         r.set(key, ip, ex=expire_seconds)
 
-    def _get_ip(self):
-        _, _, ipaddrlist = socket.gethostbyname_ex(self._hostname)
-        log.debug("Local addresses: %s", ipaddrlist)
-        ip = ipaddrlist[-1]
-        return ip
+    def _deregister(self):
+        r = redis.Redis(host=self._redis_host, decode_responses=True)
+        log.info("De-register '%s'", self._hostname)
+        key = "ip:%s" % self._hostname
+        log.debug("redis DEL %r", key)
+        r.delete(key)
+
+    @staticmethod
+    def _get_ip():
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            s.connect(("198.51.100.254", 1))  # Arbitrary address via default route
+            ipaddr = s.getsockname()[0]
+        except Exception:
+            ipaddr = "127.0.0.1"
+        finally:
+            s.close()
+        return ipaddr
