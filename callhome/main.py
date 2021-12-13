@@ -28,6 +28,7 @@ def _agent():
 def _client():
     parser = _argp()
     parser.add_argument("--json", action="store_true")
+    parser.add_argument("--save", action="store_true", help="Save to /etc/hosts")
     parser.add_argument("--host", help="Print IP-address of specified host")
     parser.add_argument("--hosts-domain", default=os.environ.get("CALLHOME_DOMAIN"))
     parser.add_argument(
@@ -53,6 +54,8 @@ def _client():
     for host in hosts:
         print("%(host)s\t%(ip)s" % host)
 
+    if not args.save:
+        return
     hosts_path = "/etc/hosts"
     tempfile = client.write_hosts_file(hosts, hosts_path, args.hosts_domain)
     print("Wrote hosts to %s" % tempfile)
