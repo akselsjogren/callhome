@@ -28,6 +28,7 @@ def _agent():
 def _client():
     parser = _argp()
     parser.add_argument("--json", action="store_true")
+    parser.add_argument("--host", help="Print IP-address of specified host")
     parser.add_argument("--hosts-domain", default=os.environ.get("CALLHOME_DOMAIN"))
     parser.add_argument(
         "--clear",
@@ -39,9 +40,18 @@ def _client():
     hosts = client.get_all(args.redis_host, args.clear)
     if args.json:
         print(json.dumps(hosts))
-    else:
-        for host in hosts:
-            print("%(host)s\t%(ip)s" % host)
+        return
+    elif args.host:
+        for h in hosts:
+            if h["host"] == args.host:
+                print(h["ip"])
+                break
+        else:
+            raise CallHomeError("No record of host %s", args.host)
+        return
+
+    for host in hosts:
+        print("%(host)s\t%(ip)s" % host)
 
     hosts_path = "/etc/hosts"
     tempfile = client.write_hosts_file(hosts, hosts_path, args.hosts_domain)
