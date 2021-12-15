@@ -28,14 +28,15 @@ def get_all(redis_host, clear=False):
         last_seen = int(float(last_seen))
         ip = r.get(f"ip:{hostname}")
         log.debug("GET ip:%s -> %s", hostname, ip)
+        log.info(
+            "%-15s  last seen: %s, ip: %s",
+            hostname,
+            datetime.datetime.fromtimestamp(last_seen),
+            ip,
+        )
         if ip:
             ret.append({"host": hostname, "ip": ip, "last_seen": last_seen})
         else:
-            log.info(
-                "No IP found for host %s (last seen: %s)",
-                hostname,
-                datetime.datetime.fromtimestamp(last_seen),
-            )
             if clear:
                 log.info("HDEL host_alive %s", hostname)
                 r.hdel("host_alive", hostname)
