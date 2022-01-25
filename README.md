@@ -1,6 +1,6 @@
 # callhome service
 
-[![tests](https://github.com/akselsjogren/callhome/actions/workflows/tests.yml/badge.svg)](https://github.com/akselsjogren/callhome/actions/workflows/tests.yml)
+[![tests](https://github.com/sjoegren/callhome/actions/workflows/tests.yml/badge.svg)](https://github.com/sjoegren/callhome/actions/workflows/tests.yml)
 
 systemd service that reports systems hostname and IP address to a redis host.
 
